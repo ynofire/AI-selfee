@@ -24,6 +24,7 @@ export const COPY = {
 
   questions: {
     skip: '건너뛰기',
+    skipNoSuchPerson: '해당하는 사람이 없어요 (건너뛰기)',
     prev: '이전 문항',
     recallNote: '떠오르는 일을 짧게 적어 주세요 (선택, 300자 이내)',
     recallNext: '다음',

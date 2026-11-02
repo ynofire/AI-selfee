@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Answer, Audience, Item } from '../../core/types'
+import { displayOptions } from '../optionOrder'
 import { COPY } from '../copy'
 
 const AUDIENCE_LABEL: Record<Audience, string> = {
@@ -11,9 +12,13 @@ interface Props {
   current: Answer | 'skipped' | undefined
   onSubmit: (a: Answer) => void
   onSkip?: () => void
+  /** 두 선택지를 뒤집어 보여 줄 문항 id 모음(optionFlips). 점수와는 무관하다. */
+  flips?: ReadonlySet<string>
 }
 
-export function ItemCard({ item, current, onSubmit, onSkip }: Props) {
+const NO_FLIPS: ReadonlySet<string> = new Set()
+
+export function ItemCard({ item, current, onSubmit, onSkip, flips = NO_FLIPS }: Props) {
   const prev = current && current !== 'skipped' ? current : undefined
   const [picked, setPicked] = useState<string | null>(prev?.optionId ?? null)
   const [note, setNote] = useState(prev?.note ?? '')
@@ -31,7 +36,7 @@ export function ItemCard({ item, current, onSubmit, onSkip }: Props) {
       </h2>
 
       <div className="options" role="group" aria-labelledby="item-text">
-        {item.options.map((o) => {
+        {displayOptions(item, flips).map((o) => {
           const selected = isRecall ? picked === o.id : prev?.optionId === o.id
           return (
             <button
@@ -76,9 +81,10 @@ export function ItemCard({ item, current, onSubmit, onSkip }: Props) {
         </>
       )}
 
-      {item.sensitive && onSkip && (
+      {/* 민감한 문항은 건너뛸 수 있고, 상대가 정해진 문항은 그런 사람이 없는 경우도 있어 건너뛸 수 있다. */}
+      {(item.sensitive || item.audience) && onSkip && (
         <button type="button" className="link-button" data-testid="skip" onClick={onSkip}>
-          {COPY.questions.skip}
+          {item.audience && !item.sensitive ? COPY.questions.skipNoSuchPerson : COPY.questions.skip}
         </button>
       )}
     </section>

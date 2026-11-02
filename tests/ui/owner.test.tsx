@@ -125,15 +125,40 @@ describe('questionnaire sessions', () => {
     expect(screen.queryByTestId('skip')).toBeNull()
   })
 
+  it('also offers skip on audience items, since the user may have no such person', () => {
+    const bank = baseBank()
+    Object.assign(bank.items[0]!, { format: 'audience', audience: 'child' })
+    const { store } = mount({ bank })
+    agree()
+    expect(screen.getByTestId('skip').textContent).toContain('해당')
+    fireEvent.click(screen.getByTestId('skip'))
+    expect(stored(store).answers[bank.items[0]!.id]).toBe('skipped')
+    expect(screen.queryByTestId('skip')).toBeNull()
+  })
+
   it('lets the user go back and change the previous answer', () => {
     const { store } = mount()
     agree()
-    answerOne()
+    fireEvent.click(screen.getByTestId('option-a'))
+    expect(stored(store).answers.f1_1).toEqual({ optionId: 'a' })
     fireEvent.click(screen.getByTestId('prev'))
-    const second = screen.getAllByTestId(/^option-/)[1]!
-    fireEvent.click(second)
-    const first = baseBank().items.find((i) => i.id === 'f1_1')!
-    expect(stored(store).answers.f1_1).toEqual({ optionId: first.options[1]!.id })
+    expect(screen.getByTestId('option-a').getAttribute('aria-pressed')).toBe('true')
+    fireEvent.click(screen.getByTestId('option-b'))
+    expect(stored(store).answers.f1_1).toEqual({ optionId: 'b' })
+  })
+
+  it('shows the two options of different items in alternating order but scores by option, not by position', () => {
+    const bank = bigBank()
+    bank.items = bank.items.filter((i) => i.format === 'forced')
+    const { store } = mount({ bank })
+    agree()
+    const firstShown: string[] = []
+    for (let i = 0; i < 6; i++) {
+      firstShown.push(screen.getAllByTestId(/^option-/)[0]!.getAttribute('data-testid')!)
+      fireEvent.click(screen.getByTestId('option-b'))
+    }
+    expect(new Set(firstShown).size).toBe(2)
+    expect(Object.values(stored(store).answers).every((a) => a !== 'skipped' && a.optionId === 'b')).toBe(true)
   })
 
   it('stores a recall note of at most 300 characters', () => {

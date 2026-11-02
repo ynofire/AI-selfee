@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import type { Answer, Bank, Item } from '../../core/types'
 import type { OwnerState } from '../../core/storage'
 import { ItemCard } from '../components/ItemCard'
+import { optionFlips } from '../optionOrder'
 import { COPY } from '../copy'
 
 export const SESSION_SIZE = 18
@@ -33,6 +34,7 @@ interface Props {
 
 export function Questionnaire({ bank, answers, onAnswer, onViewReport, onDone }: Props) {
   const items = useMemo(() => orderItems(bank), [bank])
+  const flips = useMemo(() => optionFlips(bank), [bank])
   const [cursor, setCursor] = useState(() => {
     const first = items.findIndex((i) => !(i.id in answers))
     return first === -1 ? items.length : first
@@ -77,6 +79,7 @@ export function Questionnaire({ bank, answers, onAnswer, onViewReport, onDone }:
         current={answers[item.id]}
         onSubmit={submit}
         onSkip={() => submit('skipped')}
+        flips={flips}
       />
       <button
         type="button"
