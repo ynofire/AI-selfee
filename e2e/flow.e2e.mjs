@@ -1,5 +1,6 @@
 // 종단 테스트: 보낸 사람 → 초대 링크 → 받는 사람(새 컨텍스트) → 답장 링크 → v2 → 만료.
 // 실행: npm run e2e  (vite build 후 preview 서버를 직접 띄우고 끝나면 내린다)
+// 배포본 확인: BASE_URL=https://<배포 주소> npm run e2e  (서버를 띄우지 않고, 응답 헤더의 CSP도 확인한다)
 import { execFileSync, spawn } from 'node:child_process'
 import { createRequire } from 'node:module'
 import { mkdirSync, rmSync } from 'node:fs'
@@ -13,7 +14,8 @@ const { chromium } = createRequire(import.meta.url)('playwright')
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const out = join(root, 'e2e', 'out')
 const PORT = 4173
-const BASE = `http://localhost:${PORT}`
+const REMOTE = process.env.BASE_URL?.replace(/\/+$/, '')
+const BASE = REMOTE ?? `http://localhost:${PORT}`
 const VIEWPORT = { width: 390, height: 844 }
 const DAY = 24 * 60 * 60 * 1000
 
@@ -91,13 +93,20 @@ async function answerAllRater(page) {
   return answered
 }
 
-const server = await startServer()
+// 배포본이면 서버를 띄우지 않는다. vite preview는 vercel.json 헤더를 적용하지 않으므로 CSP는 배포본에서만 확인할 수 있다.
+const server = REMOTE ? null : await startServer()
 const browser = await chromium.launch()
 const sink = { requests: [], errors: [] }
 let failed = null
 
 try {
   const opts = { viewport: VIEWPORT, permissions: ['clipboard-read', 'clipboard-write'] }
+
+  if (REMOTE) {
+    const csp = (await fetch(BASE)).headers.get('content-security-policy') ?? ''
+    assert.ok(csp.includes("connect-src 'none'"), `배포본 응답에 connect-src 'none' CSP가 없음: "${csp}"`)
+    log(`CSP 확인: ${csp.length}자, connect-src 'none' 포함`)
+  }
 
   // ① 보낸 사람
   const ownerCtx = await browser.newContext(opts)
@@ -223,7 +232,7 @@ try {
   failed = e
 } finally {
   await browser.close()
-  server.kill()
+  server?.kill()
 }
 
 if (failed) {
