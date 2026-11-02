@@ -1,6 +1,8 @@
 import { useMemo, useRef } from 'react'
 import type { Answers, Bank } from '../../core/types'
 import type { Report } from '../../core/scoring'
+import type { ReportV2 } from '../../core/rater'
+import type { ReplyPayload } from '../../core/codec'
 import { buildExportMarkdown, formatLocalDate } from '../../core/exportPackage'
 import template from '../../data/prompt.v1.md?raw'
 import { COPY } from '../copy'
@@ -11,16 +13,18 @@ import { useState } from 'react'
 interface Props {
   bank: Bank
   answers: Answers
-  report: Report
+  report: Report | ReportV2
+  /** 있으면 지인의 시각([other:호칭])이 함께 들어간 v2 내보내기가 된다. */
+  reply?: ReplyPayload
   now: () => number
   onBack: () => void
 }
 
-export function ExportScreen({ bank, answers, report, now, onBack }: Props) {
+export function ExportScreen({ bank, answers, report, reply, now, onBack }: Props) {
   const generatedAt = useMemo(() => new Date(now()), [now])
   const text = useMemo(
-    () => buildExportMarkdown({ bank, answers, report, template, generatedAt }),
-    [bank, answers, report, generatedAt],
+    () => buildExportMarkdown({ bank, answers, report, reply, template, generatedAt }),
+    [bank, answers, report, reply, generatedAt],
   )
   const box = useRef<HTMLTextAreaElement>(null)
   const { status, copy } = useCopy(text, () => box.current?.select())

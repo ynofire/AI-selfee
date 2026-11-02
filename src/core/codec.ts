@@ -69,7 +69,11 @@ type Obj = Record<string, unknown>
 function header(o: unknown): { obj: Obj; bank: string; nonce: string; label: string } {
   if (typeof o !== 'object' || o === null || Array.isArray(o)) throw new PayloadError('malformed')
   const obj = o as Obj
-  if (obj.v !== 1) throw new PayloadError('version')
+  if (obj.v !== 1) {
+    // 'version'은 더 새로운 앱이 만든 링크일 때만. 버전이 없거나 숫자가 아니면 그냥 잘못된 링크다.
+    if (typeof obj.v === 'number' && Number.isInteger(obj.v) && obj.v > 1) throw new PayloadError('version')
+    invalid('v')
+  }
   const bank = obj.bank
   if (typeof bank !== 'string' || bank.length < 1 || bank.length > 32) invalid('bank')
   const nonce = obj.nonce

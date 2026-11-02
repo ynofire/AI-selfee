@@ -18,8 +18,38 @@ export interface RaterState {
   v: 1
   nonce: string
   answers: RaterAnswers
+  /** 건너뛴 문항. 다시 열었을 때 같은 문항이 되돌아오지 않게 한다. */
+  skipped?: string[]
   consentAt: number | null
   lastActiveAt: number
+}
+
+const isObject = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v)
+
+/** 저장소에서 읽은 값이 쓸 수 있는 모양인지. 깨진 값으로 화면이 죽지 않게 한다. */
+export function isOwnerState(v: unknown): v is OwnerState {
+  return (
+    isObject(v) &&
+    v.v === 1 &&
+    typeof v.bank === 'string' &&
+    typeof v.lastActiveAt === 'number' &&
+    typeof v.startedAt === 'number' &&
+    (v.consentAt === null || typeof v.consentAt === 'number') &&
+    isObject(v.answers) &&
+    isObject(v.invites)
+  )
+}
+
+export function isRaterState(v: unknown): v is RaterState {
+  return (
+    isObject(v) &&
+    v.v === 1 &&
+    typeof v.nonce === 'string' &&
+    typeof v.lastActiveAt === 'number' &&
+    (v.consentAt === null || typeof v.consentAt === 'number') &&
+    isObject(v.answers) &&
+    (v.skipped === undefined || (Array.isArray(v.skipped) && v.skipped.every((x) => typeof x === 'string')))
+  )
 }
 
 /** 쓸 수 없는 환경(사생활 보호 모드, 인앱 브라우저 등)이면 null. */
@@ -41,6 +71,11 @@ function safeRemove(store: Storage, key: string): void {
   } catch {
     /* 지울 수 없어도 흐름을 막지 않는다 */
   }
+}
+
+/** 키 하나만 지운다. 저장소가 없거나 지울 수 없어도 던지지 않는다. */
+export function removeKey(store: Storage | null, key: string): void {
+  if (store) safeRemove(store, key)
 }
 
 export function load<T extends { lastActiveAt: number }>(

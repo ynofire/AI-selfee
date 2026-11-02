@@ -85,3 +85,6 @@ details { margin: 8px 0; }
 summary { cursor: pointer; color: var(--muted); }
 .foot { margin-top: 32px; border-top: 1px solid var(--line); padding-top: 12px; }
 .wipe-ask { display: grid; gap: 8px; }
+.meter-marker.other { background: var(--card); border: 3px solid var(--accent); }
+.rate-grid { display: grid; gap: 8px; }
+.url-box { margin: 8px 0; }

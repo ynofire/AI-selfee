@@ -1,10 +1,8 @@
 import { useCallback, useMemo, useState } from 'react'
 import type { Bank } from '../../core/types'
 import { computeReport } from '../../core/scoring'
-import { expiryInfo } from '../../core/storage'
-import { Banner } from '../components/Banner'
+import { StatusBanners } from '../components/StatusBanners'
 import { WipeButton } from '../components/WipeButton'
-import { COPY } from '../copy'
 import { useOwnerState } from '../hooks/useOwnerState'
 import { ExportScreen } from './ExportScreen'
 import { InviteScreen } from './InviteScreen'
@@ -32,23 +30,17 @@ export function OwnerApp({ bank, store, now }: Props) {
   const finish = useCallback(() => setView('report'), [])
 
   const consented = o.state.consentAt !== null
-  const info = expiryInfo(o.state.lastActiveAt, now())
-  const expiring = consented && !info.expired && info.hoursLeft < 24
 
   return (
     <main className="app" data-testid="screen-owner">
-      {!o.storageOk && (
-        <Banner id="banner-nostore" tone="warn">
-          {COPY.banners.nostore}
-        </Banner>
-      )}
-      {expiring && (
-        <Banner id="banner-expiring" tone="warn">
-          {COPY.banners.expiring(info.hoursLeft)}
-        </Banner>
-      )}
-      {view === 'start' && o.notice === 'expired' && <Banner id="banner-expired">{COPY.banners.expired}</Banner>}
-      {view === 'start' && o.notice === 'bank' && <Banner id="banner-bankchanged">{COPY.banners.bankChanged}</Banner>}
+      <StatusBanners
+        storageOk={o.storageOk}
+        consented={consented}
+        lastActiveAt={o.state.lastActiveAt}
+        now={now}
+        notice={o.notice}
+        atStart={view === 'start'}
+      />
 
       {view === 'start' && (
         <StartScreen

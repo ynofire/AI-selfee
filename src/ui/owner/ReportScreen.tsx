@@ -1,13 +1,11 @@
 import type { Answers, Axis, Bank } from '../../core/types'
 import type { AxisResult, Report } from '../../core/scoring'
+import { AxisMeter } from '../components/AxisMeter'
+import { summaryFor } from '../axisText'
 import { COPY } from '../copy'
 
 const GRADE_LABEL: Record<AxisResult['grade'], string> = {
   self: '내가 말한 것 위주', behavior: '실제 행동 위주', other: '지인이 확인함',
-}
-
-function summaryFor(axis: Axis, score: number): string {
-  return score < 34 ? axis.summary.low : score < 67 ? axis.summary.mid : axis.summary.high
 }
 
 function answeredCount(bank: Bank, answers: Answers, axisId: string): number {
@@ -33,13 +31,7 @@ function AxisRow({ bank, answers, axis, result }: { bank: Bank; answers: Answers
         </p>
       ) : (
         <>
-          <div className="meter" role="img" aria-label={`${axis.name}: ${axis.low}에서 ${axis.high} 쪽으로 ${score}/100`}>
-            <div className="meter-marker" style={{ left: `${score}%` }} />
-          </div>
-          <div className="meter-ends">
-            <span>{axis.low}</span>
-            <span>{axis.high}</span>
-          </div>
+          <AxisMeter axis={axis} score={score} />
           <p>{summaryFor(axis, score)}</p>
           {result.spread !== null && (
             <p className="muted">

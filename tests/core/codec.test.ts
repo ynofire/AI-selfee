@@ -42,6 +42,13 @@ describe('decode rejects bad input', () => {
   it('rejects version 2', () => {
     expect(codeOf(() => decodeInvite(raw({ ...invite, v: 2 })))).toBe('version')
   })
+  it('calls a payload without a usable version "invalid", reserving "version" for newer ones', () => {
+    for (const bad of [{ a: 1 }, { ...invite, v: undefined }, { ...invite, v: '1' }, { ...invite, v: 0 }, { ...invite, v: 1.5 }]) {
+      expect(codeOf(() => decodeInvite(raw(bad)))).toBe('invalid')
+      expect(codeOf(() => decodeReply(raw(bad)))).toBe('invalid')
+    }
+    expect(codeOf(() => decodeReply(raw({ ...reply, v: 3 })))).toBe('version')
+  })
   it('rejects a score above 100', () => {
     expect(codeOf(() => decodeInvite(raw({ ...invite, axes: [['a01', 101, null]] })))).toBe('invalid')
   })
