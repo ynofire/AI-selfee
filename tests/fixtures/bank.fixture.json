@@ -1,0 +1,39 @@
+{
+  "version": "fixture-1",
+  "axes": [
+    {
+      "id": "f1", "name": "표현 필터", "layer": "actual", "observable": true,
+      "low": "생각을 그대로 말한다", "high": "상대에 따라 가려서 말한다",
+      "summary": { "low": "대부분 상대에게 비슷하게 말하는 편이에요.", "mid": "상대에 따라 말투가 어느 정도 달라져요.", "high": "상대에 따라 말하는 방식이 크게 달라져요." }
+    },
+    {
+      "id": "f2", "name": "결정 방식", "layer": "actual", "observable": false,
+      "low": "바로 정한다", "high": "충분히 따져 본다",
+      "summary": { "low": "빠르게 정하는 편이에요.", "mid": "상황에 따라 속도가 달라요.", "high": "충분히 따져 보고 정하는 편이에요." }
+    },
+    {
+      "id": "f3", "name": "되고 싶은 나", "layer": "desired", "observable": false,
+      "low": "지금 모습 유지", "high": "많이 바뀌고 싶다",
+      "summary": { "low": "지금 모습이 마음에 들어요.", "mid": "일부는 바꾸고 싶어요.", "high": "많이 바뀌고 싶어요." }
+    }
+  ],
+  "items": [
+    { "id": "f1_1", "axisId": "f1", "format": "forced", "basis": "self", "text": "불편한 얘기를 들었을 때 나는", "options": [ { "id": "a", "label": "바로 내 생각을 말한다", "value": 20 }, { "id": "b", "label": "말을 고른 뒤에 꺼낸다", "value": 80 } ] },
+    { "id": "f1_2", "axisId": "f1", "format": "forced", "basis": "self", "text": "처음 만난 사람에게 나는", "options": [ { "id": "a", "label": "있는 그대로 보여 준다", "value": 20 }, { "id": "b", "label": "분위기를 보고 맞춘다", "value": 80 } ] },
+    { "id": "f1_3", "axisId": "f1", "format": "frequency", "basis": "behavior", "text": "최근 한 달 동안 속마음을 숨기고 웃은 적은", "options": [ { "id": "n0", "label": "거의 없다", "value": 0 }, { "id": "n1", "label": "1~2번", "value": 33 }, { "id": "n2", "label": "3~5번", "value": 67 }, { "id": "n3", "label": "6번 이상", "value": 100 } ] },
+    { "id": "f1_4", "axisId": "f1", "format": "audience", "audience": "spouse", "basis": "behavior", "text": "배우자에게 서운한 일이 생기면", "options": [ { "id": "a", "label": "그날 바로 말한다", "value": 20 }, { "id": "b", "label": "상황을 보고 말한다", "value": 80 } ] },
+    { "id": "f1_5", "axisId": "f1", "format": "audience", "audience": "boss", "basis": "behavior", "text": "직장 상급자에게 서운한 일이 생기면", "options": [ { "id": "a", "label": "그날 바로 말한다", "value": 20 }, { "id": "b", "label": "상황을 보고 말한다", "value": 80 } ] },
+    { "id": "f2_1", "axisId": "f2", "format": "forced", "basis": "self", "text": "중요한 결정 앞에서 나는", "options": [ { "id": "a", "label": "일단 해 보고 고친다", "value": 20 }, { "id": "b", "label": "충분히 알아본 뒤 정한다", "value": 80 } ] },
+    { "id": "f2_2", "axisId": "f2", "format": "forced", "basis": "self", "text": "선택지가 비슷할 때 나는", "options": [ { "id": "a", "label": "직감을 믿는다", "value": 20 }, { "id": "b", "label": "표로 비교한다", "value": 80 } ] },
+    { "id": "f2_3", "axisId": "f2", "format": "forced", "basis": "self", "text": "결정을 미루게 될 때 나는", "options": [ { "id": "a", "label": "시한을 정해 둔다", "value": 20 }, { "id": "b", "label": "정보가 모일 때까지 둔다", "value": 80 } ] },
+    { "id": "f3_1", "axisId": "f3", "format": "forced", "basis": "self", "text": "1년 뒤의 나는", "options": [ { "id": "a", "label": "지금과 비슷하면 좋겠다", "value": 20 }, { "id": "b", "label": "많이 달라졌으면 좋겠다", "value": 80 } ] },
+    { "id": "f3_2", "axisId": "f3", "format": "forced", "basis": "self", "text": "더 키우고 싶은 쪽은", "options": [ { "id": "a", "label": "지금 잘하는 것", "value": 20 }, { "id": "b", "label": "지금 부족한 것", "value": 80 } ] },
+    { "id": "f3_3", "axisId": "f3", "format": "forced", "basis": "self", "text": "사람들에게 남기고 싶은 모습은", "options": [ { "id": "a", "label": "있는 그대로의 나", "value": 20 }, { "id": "b", "label": "가장 좋았던 시기의 나", "value": 80 } ] }
+  ],
+  "raterItems": [
+    { "id": "f1_r1", "axisId": "f1", "kind": "observe", "text": "이 사람은 상대에 따라 말하는 방식이 달라져요." },
+    { "id": "f1_r2", "axisId": "f1", "kind": "observe", "text": "이 사람은 불편한 말을 바로 꺼내지 않고 고른 뒤에 해요." },
+    { "id": "f1_r3", "axisId": "f1", "kind": "observe", "text": "이 사람은 속마음을 숨기고 웃을 때가 있어요." },
+    { "id": "f1_ra", "axisId": "f1", "kind": "audience", "text": "이 사람은 가족과 직장 사람 앞에서 말하는 방식이 다르다는 리포트 내용이 맞나요?" }
+  ]
+}
