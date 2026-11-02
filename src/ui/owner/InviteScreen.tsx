@@ -84,7 +84,7 @@ export function InviteScreen({ bank, report, onRemember, onBack }: Props) {
         </>
       )}
 
-      <button type="button" className="link-button" onClick={onBack}>
+      <button type="button" className="link-button" data-testid="back" onClick={onBack}>
         {COPY.invite.back}
       </button>
     </section>

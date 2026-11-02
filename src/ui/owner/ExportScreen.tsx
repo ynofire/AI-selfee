@@ -71,7 +71,7 @@ export function ExportScreen({ bank, answers, report, reply, now, onBack }: Prop
       {status === 'failed' && <p role="alert" data-testid="copy-failed">{COPY.export.copyFailed}</p>}
       {downloadFailed && <p role="alert" data-testid="download-failed">{COPY.export.downloadFailed}</p>}
 
-      <button type="button" className="link-button" onClick={onBack}>
+      <button type="button" className="link-button" data-testid="back" onClick={onBack}>
         {COPY.export.back}
       </button>
     </section>
