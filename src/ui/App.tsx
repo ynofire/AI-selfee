@@ -1,7 +1,7 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import bankJson from '../data/bank.v1.json'
 import { validateBank } from '../core/bank'
-import { getStore } from '../core/storage'
+import { getStore, sweepExpired } from '../core/storage'
 import { OwnerApp } from './owner/OwnerApp'
 import { ReplyScreen } from './owner/ReplyScreen'
 import { RaterApp } from './rater/RaterApp'
@@ -15,6 +15,10 @@ export interface AppProps {
 
 export function App({ pathname, hash }: AppProps) {
   const store = useMemo(() => getStore(), [])
+  // 화면이 자기 상태를 먼저 읽은 뒤(렌더 중) 효과에서 정리하므로, 만료 안내는 그대로 뜬다.
+  useEffect(() => {
+    sweepExpired(store, Date.now())
+  }, [store])
   switch (pathname) {
     case '/':
       return <OwnerApp bank={BANK} store={store} now={Date.now} />

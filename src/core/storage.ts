@@ -137,6 +137,41 @@ export function clearAll(store: Storage | null): void {
   }
 }
 
+/**
+ * 7일 넘게 쓰지 않은 pq: 키를 모두 지우고, 지운 개수를 돌려준다.
+ * `load`는 지금 여는 키 하나만 검사하므로, 다시 열지 않을 초대 링크의 답변은 이 함수가 앱이 열릴 때 정리한다.
+ * 읽을 수 없는 값은 그대로 둔다(그 키를 여는 쪽이 판단한다). 던지지 않는다.
+ */
+export function sweepExpired(store: Storage | null, now: number): number {
+  if (!store) return 0
+  let removed = 0
+  try {
+    const stale: string[] = []
+    for (let i = 0; i < store.length; i++) {
+      const k = store.key(i)
+      if (k === null || !k.startsWith('pq:')) continue
+      let last: unknown
+      try {
+        last = (JSON.parse(store.getItem(k) ?? 'null') as { lastActiveAt?: unknown } | null)?.lastActiveAt
+      } catch {
+        continue
+      }
+      if (typeof last === 'number' && now - last > EXPIRY_MS) stale.push(k)
+    }
+    for (const k of stale) {
+      try {
+        store.removeItem(k)
+        removed++
+      } catch {
+        /* 지울 수 없어도 흐름을 막지 않는다 */
+      }
+    }
+  } catch {
+    /* 저장소를 읽을 수 없으면 정리할 것도 없다 */
+  }
+  return removed
+}
+
 export function expiryInfo(lastActiveAt: number, now: number): { expired: boolean; hoursLeft: number } {
   const left = lastActiveAt + EXPIRY_MS - now
   return { expired: now - lastActiveAt > EXPIRY_MS, hoursLeft: Math.max(0, Math.floor(left / 3_600_000)) }

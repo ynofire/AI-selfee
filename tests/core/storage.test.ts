@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { EXPIRY_MS, getStore, load, save, clearAll, expiryInfo } from '../../src/core/storage'
+import { EXPIRY_MS, getStore, load, save, clearAll, expiryInfo, sweepExpired } from '../../src/core/storage'
 
 class MemStore implements Storage {
   private m = new Map<string, string>()
@@ -74,6 +74,44 @@ describe('clearAll', () => {
     clearAll(s)
     expect(s.length).toBe(1)
     expect(s.getItem('other')).toBe('1')
+  })
+})
+
+describe('sweepExpired', () => {
+  const NOW = 10 * EXPIRY_MS
+  const put = (s: MemStore, k: string, lastActiveAt: number) => s.setItem(k, JSON.stringify({ lastActiveAt }))
+
+  it('removes pq: keys unused for more than 7 days, including ones this screen never opens', () => {
+    const s = new MemStore()
+    put(s, 'pq:rater:oldoldold1', NOW - EXPIRY_MS - 1)
+    put(s, 'pq:owner:v1', NOW - 30 * 24 * HOUR)
+    expect(sweepExpired(s, NOW)).toBe(2)
+    expect(s.length).toBe(0)
+  })
+
+  it('keeps keys that are exactly 7 days old or newer', () => {
+    const s = new MemStore()
+    put(s, 'pq:rater:edgeedge11', NOW - EXPIRY_MS)
+    put(s, 'pq:rater:freshfresh1', NOW - HOUR)
+    expect(sweepExpired(s, NOW)).toBe(0)
+    expect(s.length).toBe(2)
+  })
+
+  it('never touches keys outside the pq: prefix and leaves unreadable pq: values alone', () => {
+    const s = new MemStore()
+    put(s, 'other:old', 0)
+    s.setItem('pq:weird', 'not json')
+    s.setItem('pq:nodate', JSON.stringify({ a: 1 }))
+    expect(sweepExpired(s, NOW)).toBe(0)
+    expect(s.length).toBe(3)
+  })
+
+  it('does nothing without a store and never throws when the store misbehaves', () => {
+    expect(sweepExpired(null, NOW)).toBe(0)
+    const s = new MemStore()
+    put(s, 'pq:rater:oldoldold1', 0)
+    s.removeItem = () => { throw new Error('blocked') }
+    expect(() => sweepExpired(s, NOW)).not.toThrow()
   })
 })
 

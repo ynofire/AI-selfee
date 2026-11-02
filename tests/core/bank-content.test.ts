@@ -153,3 +153,26 @@ describe('question bank v1: end to end with the real scoring and codec', () => {
     expect(encodeInvite(invite).length).toBeLessThan(1000)
   })
 })
+
+describe('question bank v1: wording defects found in the final review', () => {
+  const item = (id: string) => bank.items.find((i) => i.id === id)!
+  const rater = (id: string) => bank.raterItems.find((r) => r.id === id)!
+
+  it('threshold_x2 asks how soon the person spoke up, not how forcefully (the axis is endure ↔ show early)', () => {
+    const it = item('threshold_x2')
+    expect(it.text).toContain('얼마')
+    for (const o of it.options) expect(o.label).not.toMatch(/강하게|차분|감정/)
+    expect(it.options.map((o) => o.value)).toEqual([20, 80])
+  })
+
+  it('care_r3 names speaking aloud so that both ends of the axis do not answer "yes" alike', () => {
+    expect(rater('care_r3').text).toContain('말로')
+    expect(rater('care_r3').text).not.toContain('행동')
+  })
+
+  it('flow_x1 does not open with an absolute premise that its balanced option contradicts', () => {
+    const it = item('flow_x1')
+    expect(it.text).not.toContain('모든 것을 잊')
+    expect(it.options.find((o) => o.id === 'a')!.label).toContain('균형')
+  })
+})
