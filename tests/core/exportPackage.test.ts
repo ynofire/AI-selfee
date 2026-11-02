@@ -5,7 +5,7 @@ import fixture from '../fixtures/bank.fixture.json'
 import { validateBank } from '../../src/core/bank'
 import { computeReport } from '../../src/core/scoring'
 import { buildReply, mergeReply } from '../../src/core/rater'
-import { buildExportMarkdown } from '../../src/core/exportPackage'
+import { buildExportMarkdown, formatLocalDate } from '../../src/core/exportPackage'
 import type { Answers, Bank } from '../../src/core/types'
 import type { InvitePayload } from '../../src/core/codec'
 
@@ -34,6 +34,22 @@ describe('real template', () => {
     const out = run(realTemplate)
     for (const tag of ['[stated]', '[observed]', '[other:', '[inferred]', '[desired]']) expect(out).toContain(tag)
     expect(out).toContain('2026-11-02')
+  })
+})
+
+describe('date stamp', () => {
+  it('uses the local calendar date, not UTC (early-morning KST must not show yesterday)', () => {
+    const before = process.env.TZ
+    process.env.TZ = 'Asia/Seoul'
+    try {
+      const d = new Date('2026-11-01T23:30:00Z') // 08:30 KST on 11-02
+      expect(formatLocalDate(d)).toBe('2026-11-02')
+      expect(formatLocalDate(d, '')).toBe('20261102')
+      expect(run('{{DATE}}', { generatedAt: d })).toBe('2026-11-02')
+    } finally {
+      if (before === undefined) delete process.env.TZ
+      else process.env.TZ = before
+    }
   })
 })
 

@@ -76,6 +76,12 @@ function otherSection(bank: Bank, reply?: ReplyPayload): string {
   return lines.length ? lines.join('\n') : '(지인 평가 없음)'
 }
 
+/** 사용자 기기의 달력 날짜. UTC로 자르면 한국 새벽에 하루 전 날짜가 나온다. */
+export function formatLocalDate(d: Date, sep = '-'): string {
+  const pad = (n: number): string => String(n).padStart(2, '0')
+  return [String(d.getFullYear()), pad(d.getMonth() + 1), pad(d.getDate())].join(sep)
+}
+
 export function buildExportMarkdown(args: {
   bank: Bank
   answers: Answers
@@ -86,7 +92,7 @@ export function buildExportMarkdown(args: {
 }): string {
   const { bank, answers, report, reply, template, generatedAt } = args
   const parts: Record<string, string> = {
-    DATE: generatedAt.toISOString().slice(0, 10),
+    DATE: formatLocalDate(generatedAt),
     REPORT: reportSection(bank, report),
     ANSWERS: answerSection(bank, answers, 'actual'),
     DESIRED: answerSection(bank, answers, 'desired'),
