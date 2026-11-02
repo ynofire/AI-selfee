@@ -69,7 +69,8 @@ function otherSection(bank: Bank, reply?: ReplyPayload): string {
   const lines: string[] = []
   for (const [axisId, observe, check] of reply.axes) {
     const axis = byId.get(axisId)
-    if (!axis || (observe === null && check === null)) continue
+    // 내면 축과 되고 싶은 나는 자기 보고만 쓴다(스펙 §4.2). 조작된 답장이 이 축에 [other:] 줄을 붙이지 못하게 막는다.
+    if (!axis || !axis.observable || axis.layer !== 'actual' || (observe === null && check === null)) continue
     const obs = observe === null ? '관찰 평균 없음' : `관찰 평균 ${observe}/5 (0~100 환산 ${Math.round((observe - 1) * 25)})`
     lines.push(`- [other:${reply.label}] ${axis.name}: ${obs}, 상대별 차이 확인: ${check ? CHECK_LABEL[check] : '없음'}`)
   }

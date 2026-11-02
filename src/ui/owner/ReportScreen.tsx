@@ -1,5 +1,5 @@
 import type { Answers, Axis, Bank } from '../../core/types'
-import type { AxisResult, Report } from '../../core/scoring'
+import { SPREAD_NOTABLE, type AxisResult, type Report } from '../../core/scoring'
 import { AxisMeter } from '../components/AxisMeter'
 import { summaryFor } from '../axisText'
 import { COPY } from '../copy'
@@ -35,7 +35,7 @@ function AxisRow({ bank, answers, axis, result }: { bank: Bank; answers: Answers
           <p>{summaryFor(axis, score)}</p>
           {result.spread !== null && (
             <p className="muted">
-              {result.spread >= 30 ? `상대에 따라 꽤 달라져요 (차이 ${result.spread})` : '상대에 따라 큰 차이는 없어요'}
+              {result.spread >= SPREAD_NOTABLE ? `상대에 따라 꽤 달라져요 (차이 ${result.spread})` : '상대에 따라 큰 차이는 없어요'}
             </p>
           )}
           <p className="muted">

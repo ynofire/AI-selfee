@@ -144,6 +144,15 @@ describe('other section', () => {
     expect(out).not.toContain('f1_r1')
   })
 
+  it('ignores reply axes that are not observable actual-layer axes (inner-life and desired stay self-report)', () => {
+    const crafted = { ...reply, axes: [['f1', 4, 'a'], ['f2', 5, 'a'], ['f3', 1, null]] } as typeof reply
+    const out = run('O:{{OTHER}}', { reply: crafted })
+    expect(out).toContain('[other:와이프] 표현 필터')
+    expect(out).not.toContain('결정 방식')
+    expect(out).not.toContain('되고 싶은 나')
+    expect(out.match(/\[other:/g)).toHaveLength(1)
+  })
+
   it('shows the other-rating and gap in the report after a merge', () => {
     const v2 = mergeReply(bank, computeReport(bank, answers), invite, reply)
     expect(run('R:{{REPORT}}', { report: v2, reply })).toMatch(/타인 평가 75\/100 \(차이 \d+\)/)

@@ -153,6 +153,12 @@ try {
   assert.ok(inviteUrl.startsWith(`${BASE}/r#`), `초대 링크 모양: ${inviteUrl.slice(0, 40)}`)
   assert.ok(new URL(inviteUrl).hash.length - 1 < 1000, '초대 링크가 1,000자 미만이어야 한다')
   await owner.getByTestId('invite-warning').waitFor()
+  // 같은 탭에서 해시만 바꿔 열 두 번째 링크 (호칭만 다르다)
+  await owner.getByTestId('invite-label').fill('다른호칭')
+  const inviteUrlB = await owner.getByTestId('invite-url').inputValue()
+  assert.notEqual(inviteUrlB, inviteUrl, '호칭을 바꾸면 링크도 바뀌어야 한다')
+  await owner.getByTestId('invite-label').fill('민준')
+  assert.equal(await owner.getByTestId('invite-url').inputValue(), inviteUrl, '호칭을 되돌리면 같은 링크여야 한다')
   await noHorizontalScroll(owner, '초대 화면')
   await shot(owner, '05-owner-invite')
   log(`초대 링크 ${inviteUrl.length}자`)
@@ -200,6 +206,16 @@ try {
   const v2Text = await owner.getByTestId('export-text').inputValue()
   assert.ok(v2Text.includes('[other:와이프]') && !v2Text.includes('{{'), 'v2 내보내기에 지인의 시각이 들어가야 한다')
   await shot(owner, '10-owner-v2-export')
+
+  // 같은 탭에서 /r#A → /r#B (해시만 변경)이면 화면이 새 초대로 바뀐다
+  const hopCtx = await browser.newContext(opts)
+  watch(hopCtx, 'hop', sink)
+  const hop = await hopCtx.newPage()
+  await hop.goto(inviteUrl)
+  assert.ok((await hop.getByTestId('disclosure-sender').innerText()).includes('민준'))
+  await hop.evaluate((h) => { window.location.hash = h }, new URL(inviteUrlB).hash)
+  await hop.waitForFunction(() => document.querySelector('[data-testid="disclosure-sender"]')?.textContent?.includes('다른호칭'))
+  assert.ok(!(await hop.getByTestId('disclosure-sender').innerText()).includes('민준'), '이전 초대 내용이 남아 있음')
 
   // 답장을 다른 기기(저장소 없음)에서 열면 안내가 나온다
   const strangerCtx = await browser.newContext(opts)

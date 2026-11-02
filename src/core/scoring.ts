@@ -1,5 +1,8 @@
 import type { Answers, Bank, Item } from './types'
 
+/** 상대별 차이가 이 값 이상이면 리포트가 "상대에 따라 달라져요"라고 말한다. */
+export const SPREAD_NOTABLE = 30
+
 export interface AxisResult {
   axisId: string
   score: number | null

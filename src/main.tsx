@@ -1,8 +1,8 @@
 import { createRoot } from 'react-dom/client'
-import { App } from './ui/App'
+import { Root } from './ui/Root'
 import './ui/styles.css'
 
 const root = document.getElementById('root')
 if (root) {
-  createRoot(root).render(<App pathname={window.location.pathname} hash={window.location.hash} />)
+  createRoot(root).render(<Root />)
 }

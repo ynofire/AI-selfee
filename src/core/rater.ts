@@ -1,5 +1,5 @@
 import type { Bank, RaterAnswers, RaterItem } from './types'
-import type { AxisResult, Report } from './scoring'
+import { SPREAD_NOTABLE, type AxisResult, type Report } from './scoring'
 import type { InvitePayload, ReplyPayload } from './codec'
 
 export const MAX_RATER_ITEMS = 20
@@ -30,7 +30,10 @@ export function buildRaterForm(bank: Bank, invite: InvitePayload): RaterItem[] {
   const rated = ratedAxisIds(bank, invite)
   const order = new Map(bank.axes.map((a, i) => [a.id, i]))
   const spreadOf = new Map(invite.axes.map(([id, , spread]) => [id, spread]))
-  const eligible = bank.raterItems.filter((r) => rated.includes(r.axisId))
+  // 상대별 차이 확인 문항은 리포트가 "상대에 따라 달라져요"라고 말한 축에만 묻는다. 지인이 본 적 없는 주장에는 답할 수 없다.
+  const eligible = bank.raterItems.filter(
+    (r) => rated.includes(r.axisId) && (r.kind === 'observe' || (spreadOf.get(r.axisId) ?? -1) >= SPREAD_NOTABLE),
+  )
 
   const observe = eligible
     .filter((r) => r.kind === 'observe')

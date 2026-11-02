@@ -23,7 +23,12 @@ const ownerAnswers: Answers = {
   f2_1: { optionId: 'b' }, f2_2: { optionId: 'b' }, f2_3: { optionId: 'b' },
 }
 const ownerReport = computeReport(bank, ownerAnswers)
-const invite: InvitePayload = makeInvite(bank, ownerReport, '민준', NONCE)
+const baseInvite = makeInvite(bank, ownerReport, '민준', NONCE)
+// 상대별 차이 확인 문항은 리포트가 "상대에 따라 달라져요"라고 한 축에만 나온다 → f1의 차이를 60으로 고정한다.
+const invite: InvitePayload = {
+  ...baseInvite,
+  axes: baseInvite.axes.map(([id, score, spread]) => [id, score, id === 'f1' ? 60 : spread]) as InvitePayload['axes'],
+}
 const inviteHash = `#${encodeInvite(invite)}`
 
 const ownerState = (over: Partial<OwnerState> = {}): OwnerState => ({
@@ -128,7 +133,7 @@ describe('rater: questions', () => {
         { id: `s${i + 1}_ra`, axisId: `s${i + 1}`, kind: 'audience' as const, text: 't' },
       ]).flat(),
     }
-    const inv: InvitePayload = { v: 1, bank: 'syn', nonce: NONCE, label: '민준', axes: syn.axes.map((a) => [a.id, 50, 10]) }
+    const inv: InvitePayload = { v: 1, bank: 'syn', nonce: NONCE, label: '민준', axes: syn.axes.map((a) => [a.id, 50, 60]) }
     mountRater({ hash: `#${encodeInvite(inv)}`, bank: syn })
     agree()
     begin()
@@ -314,5 +319,23 @@ describe('reply viewer (/b#)', () => {
     expect(text).toContain('[other:와이프] 표현 필터')
     expect(text).toMatch(/타인 평가 75\/100 \(차이 \d+\)/)
     expect(text).not.toContain('{{')
+  })
+})
+
+describe('rater summary shows the claim the spread-check question asks about', () => {
+  const withSpread = (spread: number | null): string =>
+    `#${encodeInvite({ ...invite, axes: [['f1', 65, spread], ['f2', 40, 10]] })}`
+
+  it('says the person differs by audience when the invite spread is notable', () => {
+    mountRater({ hash: withSpread(60) })
+    agree()
+    expect(screen.getByTestId('summary-f1-spread').textContent).toContain('상대에 따라')
+    expect(screen.queryByTestId('summary-f2-spread')).toBeNull()
+  })
+
+  it('says nothing about audience differences when the spread is null', () => {
+    mountRater({ hash: withSpread(null) })
+    agree()
+    expect(screen.queryByTestId('summary-f1-spread')).toBeNull()
   })
 })

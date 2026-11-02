@@ -5,6 +5,7 @@ import type { Bank, RaterAnswers } from '../../src/core/types'
 import type { Report } from '../../src/core/scoring'
 import type { InvitePayload, ReplyPayload } from '../../src/core/codec'
 import { buildRaterForm, buildReply, mergeReply, MergeError } from '../../src/core/rater'
+import { SPREAD_NOTABLE } from '../../src/core/scoring'
 
 const bank = validateBank(fixture)
 const NONCE = 'abcdefgh1234'
@@ -41,8 +42,20 @@ describe('buildRaterForm', () => {
 
   it('skips observable axes that are missing from the invite', () => {
     const syn = synthetic(6)
-    const onlyS1: InvitePayload = { ...invite, bank: 'syn', axes: [['s1', 50, 10]] }
+    const onlyS1: InvitePayload = { ...invite, bank: 'syn', axes: [['s1', 50, SPREAD_NOTABLE]] }
     expect(buildRaterForm(syn, onlyS1)).toHaveLength(4)
+  })
+
+  it('asks the spread-check item only for axes whose report says the person differs by audience', () => {
+    const syn = synthetic(3)
+    const inv: InvitePayload = {
+      ...invite, bank: 'syn', axes: [['s1', 50, SPREAD_NOTABLE - 1], ['s2', 50, null], ['s3', 50, SPREAD_NOTABLE]],
+    }
+    const ids = buildRaterForm(syn, inv).map((i) => i.id)
+    expect(ids).toContain('s3_ra')
+    expect(ids).not.toContain('s1_ra')
+    expect(ids).not.toContain('s2_ra')
+    expect(ids.filter((id) => id.endsWith('_ra'))).toHaveLength(1)
   })
 
   it('caps at 20 with observe items first and the widest spreads next', () => {

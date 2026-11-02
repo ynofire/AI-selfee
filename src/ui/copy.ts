@@ -108,6 +108,7 @@ export const COPY = {
     consent: '위 내용을 읽었고, 이 기기에 답변을 저장하는 데 동의해요.',
     start: '시작하기',
     summaryTitle: (sender: string) => `${sender}님의 리포트 요약`,
+    spreadClaim: '리포트에는 이 사람이 상대에 따라 이 부분이 꽤 달라진다고 적혀 있어요.',
     summaryLead: '이 사람은 자기를 이렇게 봐요. 아래 질문은 옆에서 본 모습이 어떤지 묻는 거예요.',
     begin: '질문 시작',
     scaleHint: '이 사람에 대해 얼마나 그렇다고 느끼세요?',
